@@ -43,7 +43,7 @@ fun knowledge(action: KnowledgeBuilder.() -> Unit): Knowledge {
     val builder = KnowledgeBuilder()
     builder.action()
     return Knowledge(
-        builder.factsBuilder.facts.map(::Fact),
+        builder.factsBuilder.facts.mapIndexed { i, expr -> Fact(i+1, expr) },
         builder.variablesBuilder.variables,
         builder.variablesBuilder.inputs,
         builder.variablesBuilder.outputs

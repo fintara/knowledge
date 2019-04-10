@@ -51,3 +51,27 @@ val driverKnowledge = knowledge {
         create { 6 implies !1 }
     }
 }
+
+val plantKnowledge = knowledge {
+    variables {
+        create(1, "the first valve is open")
+        create(2, "the second valve is closed")
+        create(3, "the process state is normal")
+        create(4, "product temperature is low")
+        create(5, "pressure is high")
+        create(6, "operation O1 is executed after O2")
+        create(7, "humidity is lower than 50%")
+        create(8, "operation O2 is executed after O1")
+        create(9, "humidity is 40%")
+        inputs(1, 2, 6, 8)
+        outputs(3)
+    }
+
+    facts {
+        create { ref(1) and ref(2) implies ref(3) }
+        create { (ref(4) and ref(3)) or (ref(5) and !ref(3)) }
+        create { ref(6) implies ref(7) }
+        create { (!ref(2) and !ref(7) or (ref(8) and ref(9))) }
+        create { (ref(1) and !ref(9)) implies !ref(5) }
+    }
+}
