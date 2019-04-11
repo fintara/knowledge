@@ -30,7 +30,7 @@ class VariableBuilder {
     val variables: MutableList<Expr.Variable> = mutableListOf()
     val inputs: MutableList<Int> = mutableListOf()
     val outputs: MutableList<Int> = mutableListOf()
-    fun create(identifier: Int, label: String) = variables.add(Expr.Variable(identifier, label))
+    fun create(identifier: Int, label: String = "Variable $identifier") = variables.add(Expr.Variable(identifier, label))
     fun inputs(vararg values: Int) = inputs.addAll(values.toList())
     fun outputs(vararg values: Int) = outputs.addAll(values.toList())
 }

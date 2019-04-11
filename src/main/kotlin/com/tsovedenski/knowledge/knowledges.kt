@@ -77,3 +77,20 @@ val plantKnowledge = knowledge {
         create { (ref(1) and !ref(9)) implies !ref(5) }
     }
 }
+
+val randomKnowledge = knowledge {
+    variables {
+        (1..10).forEach { create(it) }
+        outputs(9, 10)
+    }
+
+    facts {
+        create { ref(3) and ref(10) }
+        create { ref(4) or ref(9) }
+        create { ref(4) implies (ref(5) and ref(6)) }
+        create { ref(5) or ref(6) implies ref(3) }
+        create { ref(8) implies ref(6) }
+        create { (ref(5) or ref(7)) implies !ref(6) }
+        create { ref(1) or ref(2) or ref(8) }
+    }
+}

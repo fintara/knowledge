@@ -2,6 +2,7 @@ package com.tsovedenski.knowledge
 
 import java.lang.Math.pow
 import kotlin.math.roundToInt
+import kotlin.system.measureTimeMillis
 
 /**
  * Created by Tsvetan Ovedenski on 2019-04-09.
@@ -15,20 +16,29 @@ fun Int.pow(exp: Int) = Math.pow(this.toDouble(), exp.toDouble()).roundToInt()
 fun main() {
 //    val ap = AnalysisProblem(plantKnowledge) { create { ref(1) and ref(6) } }
 //    val ap = AnalysisProblem(driverKnowledge) { create { !ref(1) and ref(3) } }
-    val dmp = DecisionMakingProblem(driverKnowledge) { create { !ref(2) and !ref(4) } }
-    val solution = dmp.solve()
-
-    solution.pretty().println()
-
-    plantKnowledge.facts.forEach { println("F${it.identifier} = ${it.expr.pretty()}") }
-//    val decomposed = ap.decompose()
+//    val dmp = DecisionMakingProblem(driverKnowledge) { create { !ref(2) and !ref(4) } }
+//    val solution = dmp.solve()
 //
+//    solution.pretty().println()
+//
+//    plantKnowledge.facts.forEach { println("F${it.identifier} = ${it.expr.pretty()}") }
+
+    val ap = AnalysisProblem(randomKnowledge) { create { !ref(1) } }
+
+//    val decomposed = ap.decompose()
 //    decomposed.forEachIndexed { index, layer ->
 //        if (layer.facts.isNotEmpty()) {
 //            println("F_$index=(${layer.facts.map { it.identifier }.joinToString(",")})")
 //        }
 //        println("alpha_$index=(${layer.variables.map { it.identifier }.joinToString(",")})")
 //    }
+
+    lateinit var solution: Expr
+    val time = measureTimeMillis {
+        solution = ap.solve()
+    }
+    solution.pretty().println()
+    println("Took $time ms")
 }
 
 data class Fact(val identifier: Int, val expr: Expr)
@@ -117,7 +127,7 @@ class AnalysisProblem(
             return s
         }
 
-        return s + knowledge.outputs.map { Expr.Value(env.getValue(it.identifier)) }.conj()
+        return s + knowledge.outputs.map { if (env.getValue(it.identifier)) it else Expr.Not(it) }.conj()
     }
 
     private fun toEnv(i: Int): Map<Int, Boolean> = i
