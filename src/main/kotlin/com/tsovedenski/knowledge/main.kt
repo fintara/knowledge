@@ -10,6 +10,7 @@ import kotlin.system.measureTimeMillis
 fun <T> T.println() = also { println(it) }
 
 fun Int.bits(): List<Boolean> = (0..31).map { 1 == ((this shr it) and 1) }
+fun Int.bits(length: Int): List<Boolean> = (0 until length).map { 1 == ((this shr it) and 1) }
 
 fun Int.pow(exp: Int) = Math.pow(this.toDouble(), exp.toDouble()).roundToInt()
 
@@ -67,7 +68,7 @@ class DecisionMakingProblem(
     fun solve(): Expr {
         val (su1, su2) = generateSequence(0, Int::inc)
             .take(2.pow(knowledge.variables.size))
-            .map(::toEnv)
+            .map { toEnv(it, knowledge.variables.size) }
             .fold(Pair(emptySet(), emptySet()), ::solve)
 
         val s = su1 - su2
@@ -75,23 +76,29 @@ class DecisionMakingProblem(
     }
 
     private fun solve(s: Pair<Set<Expr>, Set<Expr>>, env: Map<Int, Boolean>): Pair<Set<Expr>, Set<Expr>> {
-        val fu = outputProperty.expr.eval(env)
-        if (!fu) {
+        val fy = outputProperty.expr.eval(env)
+        val f = knowledge.facts.conj().expr.eval(env)
+
+        if (!f) {
+            // doesn't agree with our knowledge
             return s
         }
 
-        val solution = knowledge.facts.conj().expr.eval(env)
-        val vars = knowledge.outputs.map { Expr.Value(env.getValue(it.identifier)) }.conj()
+        val vars = knowledge.inputs.map { if (env.getValue(it.identifier)) it else Expr.Not(it) }.conj()
 
-        if (!solution) {
-            return Pair(s.first, s.second + vars)
+        val pair = if (fy) {
+            // possibly correct
+            Pair(s.first + vars, s.second)
+        } else {
+            // possibly incorrect
+            Pair(s.first, s.second + vars)
         }
 
-        return Pair(s.first + vars, s.second)
+        return pair
     }
 
-    private fun toEnv(i: Int): Map<Int, Boolean> = i
-        .bits()
+    private fun toEnv(i: Int, length: Int): Map<Int, Boolean> = i
+        .bits(length)
         .zip(knowledge.variables)
         .map { Pair(it.second.identifier, it.first) }
         .toMap()
@@ -101,7 +108,7 @@ class AnalysisProblem(
     private val knowledge: Knowledge,
     private val inputPropertyBuilder: FactsBuilder.() -> Unit
 ) {
-    private val inputProperty by lazy {
+    val inputProperty by lazy {
         FactsBuilder(knowledge.variables)
             .apply(inputPropertyBuilder)
             .facts.map { Fact(99, it) }

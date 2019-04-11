@@ -24,6 +24,8 @@ val cakeKnowledge = knowledge {
         create(2, "cooking time is smaller than 60 mins")
         create(3, "cake is tasty")
         create(4, "cake is inedible")
+        inputs(1, 2)
+        outputs(3, 4)
     }
 
     facts {
