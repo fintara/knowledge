@@ -1,4 +1,4 @@
-package com.tsovedenski.knowledge
+package com.tsovedenski.knowledge.logical
 
 /**
  * Created by Tsvetan Ovedenski on 2019-04-10.
@@ -24,6 +24,7 @@ fun Expr.eval(env: Map<Int, Boolean>): Boolean = when (this) {
 infix fun Expr.implies(tail: Expr) = Expr.Implies(this, tail)
 infix fun Expr.and(right: Expr) = Expr.And(this, right)
 infix fun Expr.or(right: Expr) = Expr.Or(this, right)
+
 operator fun Expr.not() = Expr.Not(this)
 
 fun Expr.contains(vars: List<Expr.Variable>): Boolean = when (this) {
@@ -59,8 +60,9 @@ fun Expr.pretty(): String = when (this) {
     is Expr.Implies -> "${with(head.count()) { if (this > 1) "(${head.pretty()})" else head.pretty() }} => ${with(tail.count()) { if (this > 1) "(${tail.pretty()})" else tail.pretty() }}"
     is Expr.And -> "${with(left.count()) { if (this > 1) "(${left.pretty()})" else left.pretty() }} ∧ ${with(right.count()) { if (this > 1) "(${right.pretty()})" else right.pretty() }}"
     is Expr.Or -> "${with(left.count()) { if (this > 1) "(${left.pretty()})" else left.pretty() }} ∨ ${with(right.count()) { if (this > 1) "(${right.pretty()})" else right.pretty() }}"
-    is Expr.Not -> with (expr.count()) { if (this > 1) "¬(${expr.pretty()})" else "¬${expr.pretty()}" }
+    is Expr.Not -> with(expr.count()) { if (this > 1) "¬(${expr.pretty()})" else "¬${expr.pretty()}" }
 }
 
 fun Iterable<Expr>.disj(): Expr = if (count() == 0) Expr.Value(false) else reduce(Expr::Or)
+
 fun Iterable<Expr>.conj(): Expr = if (count() == 0) Expr.Value(false) else reduce(Expr::And)

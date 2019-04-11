@@ -1,5 +1,6 @@
-package com.tsovedenski.knowledge
+package com.tsovedenski.knowledge.logical
 
+import com.tsovedenski.knowledge.logical.problems.AnalysisProblem
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.dsl.TestBody
@@ -10,7 +11,7 @@ import org.spekframework.spek2.style.specification.describe
  */
 private fun TestBody.runDecomposition(
     knowledge: Knowledge,
-    propertyBuilder: FactsBuilder.() -> Unit,
+    propertyBuilder: FactsBuilder.() -> Expr,
     expected: List<Pair<List<Int>, List<Int>>>
 ) {
     val ap = AnalysisProblem(knowledge, propertyBuilder)
@@ -27,7 +28,7 @@ private fun TestBody.runDecomposition(
 
 private fun TestBody.runSolution(
     knowledge: Knowledge,
-    propertyBuilder: FactsBuilder.() -> Unit,
+    propertyBuilder: FactsBuilder.() -> Expr,
     expectedBuilder: ExprBuilder.() -> Expr
 ) {
     val ap = AnalysisProblem(knowledge, propertyBuilder)
@@ -43,7 +44,7 @@ object AnalysisProblemSpec : Spek({
         it("decomposes driver knowledge") {
             runDecomposition(
                 driverKnowledge,
-                { create { !ref(1) and ref(3) } },
+                { !ref(1) and ref(3) },
                 listOf(
                     Pair(
                         emptyList(),
@@ -64,7 +65,7 @@ object AnalysisProblemSpec : Spek({
         it("decomposes random knowledge") {
             runDecomposition(
                 randomKnowledge,
-                { create { !ref(1) } },
+                { !ref(1) },
                 listOf(
                     Pair(
                         emptyList(),
@@ -99,7 +100,7 @@ object AnalysisProblemSpec : Spek({
         it("solves driver knowledge") {
             runSolution(
                 driverKnowledge,
-                { create { !ref(1) and ref(3) } },
+                { !ref(1) and ref(3) },
                 { (!ref(2) and ref(4)) or (ref(2) and ref(4)) }
             )
         }
@@ -107,7 +108,7 @@ object AnalysisProblemSpec : Spek({
         it("solves random knowledge") {
             runSolution(
                 randomKnowledge,
-                { create { !ref(1) } },
+                { !ref(1) },
                 { ref(9) and ref(10) }
             )
         }

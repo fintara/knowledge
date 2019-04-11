@@ -1,4 +1,4 @@
-package com.tsovedenski.knowledge
+package com.tsovedenski.knowledge.logical
 
 /**
  * Created by Tsvetan Ovedenski on 11/04/19.

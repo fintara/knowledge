@@ -1,5 +1,6 @@
-package com.tsovedenski.knowledge
+package com.tsovedenski.knowledge.logical
 
+import com.tsovedenski.knowledge.logical.problems.DecisionMakingProblem
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.dsl.TestBody
@@ -10,7 +11,7 @@ import org.spekframework.spek2.style.specification.describe
  */
 private fun TestBody.runSolution(
     knowledge: Knowledge,
-    propertyBuilder: FactsBuilder.() -> Unit,
+    propertyBuilder: FactsBuilder.() -> Expr,
     expectedBuilder: ExprBuilder.() -> Expr
 ) {
     val dmp = DecisionMakingProblem(knowledge, propertyBuilder)
@@ -26,7 +27,7 @@ object DecisionMakingProblemSpec : Spek({
         it ("solves cake knowledge") {
             runSolution(
                 cakeKnowledge,
-                { create { ref(3) } },
+                { ref(3) },
                 { ref(1) and ref(2) }
             )
         }
