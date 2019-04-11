@@ -41,6 +41,8 @@ val driverKnowledge = knowledge {
         create(4, "driver gets a ticket")
         create(5, "engine is 75 hp")
         create(6, "there are 6 people in car")
+        inputs(1, 3)
+        outputs(2, 4)
     }
 
     facts {

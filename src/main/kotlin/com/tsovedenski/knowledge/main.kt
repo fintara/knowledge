@@ -1,41 +1,96 @@
 package com.tsovedenski.knowledge
 
+import java.lang.Math.pow
+import kotlin.math.roundToInt
+
 /**
  * Created by Tsvetan Ovedenski on 2019-04-09.
  */
+fun <T> T.println() = also { println(it) }
+
+fun Int.pow(exp: Int) = Math.pow(this.toDouble(), exp.toDouble()).roundToInt()
+
 fun main() {
-    val ap = AnalysisProblem(plantKnowledge) { create { ref(1) and ref(6) } }
+//    val ap = AnalysisProblem(plantKnowledge) { create { ref(1) and ref(6) } }
+    val ap = AnalysisProblem(driverKnowledge) { create { !ref(1) and ref(3) } }
+    val solution = ap.solve()
 
-    val decomposed = ap.decompose()
-
-    decomposed.forEachIndexed { index, layer ->
-        if (layer.facts.isNotEmpty()) {
-            println("F_$index=(${layer.facts.map { it.identifier }.joinToString(",")})")
-        }
-        println("alpha_$index=(${layer.variables.map { it.identifier }.joinToString(",")})")
-    }
+    solution.pretty().println()
+//    val decomposed = ap.decompose()
+//
+//    decomposed.forEachIndexed { index, layer ->
+//        if (layer.facts.isNotEmpty()) {
+//            println("F_$index=(${layer.facts.map { it.identifier }.joinToString(",")})")
+//        }
+//        println("alpha_$index=(${layer.variables.map { it.identifier }.joinToString(",")})")
+//    }
 }
 
 data class Fact(val identifier: Int, val expr: Expr)
 
+fun List<Fact>.disj() = reduce { acc, fact -> Fact(acc.identifier + fact.identifier, Expr.Or(acc.expr, fact.expr)) }
+fun List<Fact>.conj() = reduce { acc, fact -> Fact(acc.identifier + fact.identifier, Expr.And(acc.expr, fact.expr)) }
+
 data class Knowledge(
     val facts: List<Fact>,
     val variables: List<Expr.Variable>,
-    val inputProperties: List<Int>,
-    val outputProperties: List<Int>
+    val inputs: List<Expr.Variable>,
+    val outputs: List<Expr.Variable>
 )
 
 class AnalysisProblem(
     private val knowledge: Knowledge,
-    private val inputProperty: FactsBuilder.() -> Unit
+    private val inputPropertyBuilder: FactsBuilder.() -> Unit
 ) {
+    private val inputProperty by lazy {
+        FactsBuilder(knowledge.variables)
+            .apply(inputPropertyBuilder)
+            .facts.map { Fact(99, it) }
+            .first()
+    }
+
+    fun Int.bits(): List<Boolean> = (0..31).map { 1 == ((this shr it) and 1) }
+
+    fun solve(): Expr {
+        return generateSequence(0, Int::inc)
+            .take(2.pow(knowledge.variables.size))
+            .map(::toEnv)
+            .fold(emptySet(), ::solve)
+            .disj()
+    }
+
+    private fun solve(s: Set<Expr>, env: Map<Int, Boolean>): Set<Expr> {
+        val fu = inputProperty.expr.eval(env)
+        if (!fu) {
+            return s
+        }
+
+        val solution = knowledge.facts.conj().expr.eval(env)
+        if (!solution) {
+            return s
+        }
+
+        return s + knowledge.outputs.map { Expr.Value(env.getValue(it.identifier)) }.conj()
+    }
+
+    private fun toEnv(i: Int): Map<Int, Boolean> = i
+        .bits()
+        .zip(knowledge.variables)
+        .map { Pair(it.second.identifier, it.first) }
+        .toMap()
+
     fun decompose(): List<Layer> {
-        val initialFacts = knowledge.facts + FactsBuilder(knowledge.variables).apply(inputProperty).facts.map { Fact(99, it) }
+        val initialFacts = knowledge.facts + inputProperty
 
         val layer0 = Layer(
             emptyList(),
-            knowledge.outputProperties.map { id -> knowledge.variables.find { it.identifier == id }!! }
+            knowledge.outputs
         )
+
+        if (layer0.variables.isEmpty()) {
+            println("Outputs is empty list")
+            return emptyList()
+        }
 
         val initialLayers = listOf(layer0)
 

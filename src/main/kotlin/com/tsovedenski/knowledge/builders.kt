@@ -42,11 +42,12 @@ annotation class KnowledgeDsl
 fun knowledge(action: KnowledgeBuilder.() -> Unit): Knowledge {
     val builder = KnowledgeBuilder()
     builder.action()
+    val variables = builder.variablesBuilder.variables
     return Knowledge(
         builder.factsBuilder.facts.mapIndexed { i, expr -> Fact(i+1, expr) },
-        builder.variablesBuilder.variables,
-        builder.variablesBuilder.inputs,
-        builder.variablesBuilder.outputs
+        variables,
+        builder.variablesBuilder.inputs.map { id -> variables.find { it.identifier == id }!! },
+        builder.variablesBuilder.outputs.map { id -> variables.find { it.identifier == id }!! }
     )
 }
 
