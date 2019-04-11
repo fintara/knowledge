@@ -44,14 +44,23 @@ fun Expr.variables(): Set<Expr.Variable> = when (this) {
     is Expr.Not -> expr.variables()
 }
 
-fun Expr.pretty(): String = when (this) {
-    is Expr.Value -> if (value) "1" else "0"
-    is Expr.Variable -> "⍺_$identifier"
-    is Expr.Implies -> "(${head.pretty()}) => (${tail.pretty()})"
-    is Expr.And -> "(${left.pretty()})∧(${right.pretty()})"
-    is Expr.Or -> "(${left.pretty()}) ∨ (${right.pretty()})"
-    is Expr.Not -> "¬(${expr.pretty()})"
+fun Expr.count(): Int = when (this) {
+    is Expr.Value -> 1
+    is Expr.Variable -> 1
+    is Expr.Implies -> head.count() + tail.count()
+    is Expr.And -> left.count() + right.count()
+    is Expr.Or -> left.count() + right.count()
+    is Expr.Not -> expr.count()
 }
 
-fun Iterable<Expr>.disj(): Expr = reduce(Expr::Or)
-fun Iterable<Expr>.conj(): Expr = reduce(Expr::And)
+fun Expr.pretty(): String = when (this) {
+    is Expr.Value -> if (value) "1" else "0"
+    is Expr.Variable -> "⍺$identifier"
+    is Expr.Implies -> "${with(head.count()) { if (this > 1) "(${head.pretty()})" else head.pretty() }} => ${with(tail.count()) { if (this > 1) "(${tail.pretty()})" else tail.pretty() }}"
+    is Expr.And -> "${with(left.count()) { if (this > 1) "(${left.pretty()})" else left.pretty() }} ∧ ${with(right.count()) { if (this > 1) "(${right.pretty()})" else right.pretty() }}"
+    is Expr.Or -> "${with(left.count()) { if (this > 1) "(${left.pretty()})" else left.pretty() }} ∨ ${with(right.count()) { if (this > 1) "(${right.pretty()})" else right.pretty() }}"
+    is Expr.Not -> with (expr.count()) { if (this > 1) "¬(${expr.pretty()})" else "¬${expr.pretty()}" }
+}
+
+fun Iterable<Expr>.disj(): Expr = if (count() == 0) Expr.Value(false) else reduce(Expr::Or)
+fun Iterable<Expr>.conj(): Expr = if (count() == 0) Expr.Value(false) else reduce(Expr::And)

@@ -8,14 +8,19 @@ import kotlin.math.roundToInt
  */
 fun <T> T.println() = also { println(it) }
 
+fun Int.bits(): List<Boolean> = (0..31).map { 1 == ((this shr it) and 1) }
+
 fun Int.pow(exp: Int) = Math.pow(this.toDouble(), exp.toDouble()).roundToInt()
 
 fun main() {
 //    val ap = AnalysisProblem(plantKnowledge) { create { ref(1) and ref(6) } }
-    val ap = AnalysisProblem(driverKnowledge) { create { !ref(1) and ref(3) } }
-    val solution = ap.solve()
+//    val ap = AnalysisProblem(driverKnowledge) { create { !ref(1) and ref(3) } }
+    val dmp = DecisionMakingProblem(driverKnowledge) { create { !ref(2) and !ref(4) } }
+    val solution = dmp.solve()
 
     solution.pretty().println()
+
+    plantKnowledge.facts.forEach { println("F${it.identifier} = ${it.expr.pretty()}") }
 //    val decomposed = ap.decompose()
 //
 //    decomposed.forEachIndexed { index, layer ->
@@ -38,6 +43,50 @@ data class Knowledge(
     val outputs: List<Expr.Variable>
 )
 
+class DecisionMakingProblem(
+    private val knowledge: Knowledge,
+    private val outputPropertyBuilder: FactsBuilder.() -> Unit
+) {
+    private val outputProperty by lazy {
+        FactsBuilder(knowledge.variables)
+            .apply(outputPropertyBuilder)
+            .facts.map { Fact(99, it) }
+            .first()
+    }
+
+    fun solve(): Expr {
+        val (su1, su2) = generateSequence(0, Int::inc)
+            .take(2.pow(knowledge.variables.size))
+            .map(::toEnv)
+            .fold(Pair(emptySet(), emptySet()), ::solve)
+
+        val s = su1 - su2
+        return s.disj()
+    }
+
+    private fun solve(s: Pair<Set<Expr>, Set<Expr>>, env: Map<Int, Boolean>): Pair<Set<Expr>, Set<Expr>> {
+        val fu = outputProperty.expr.eval(env)
+        if (!fu) {
+            return s
+        }
+
+        val solution = knowledge.facts.conj().expr.eval(env)
+        val vars = knowledge.outputs.map { Expr.Value(env.getValue(it.identifier)) }.conj()
+
+        if (!solution) {
+            return Pair(s.first, s.second + vars)
+        }
+
+        return Pair(s.first + vars, s.second)
+    }
+
+    private fun toEnv(i: Int): Map<Int, Boolean> = i
+        .bits()
+        .zip(knowledge.variables)
+        .map { Pair(it.second.identifier, it.first) }
+        .toMap()
+}
+
 class AnalysisProblem(
     private val knowledge: Knowledge,
     private val inputPropertyBuilder: FactsBuilder.() -> Unit
@@ -48,8 +97,6 @@ class AnalysisProblem(
             .facts.map { Fact(99, it) }
             .first()
     }
-
-    fun Int.bits(): List<Boolean> = (0..31).map { 1 == ((this shr it) and 1) }
 
     fun solve(): Expr {
         return generateSequence(0, Int::inc)
