@@ -5,7 +5,7 @@ package com.tsovedenski.knowledge.associationrules
  */
 typealias Pattern = List<Value>
 
-fun pattern(vararg values: Any): Pattern = values.map { when (it) {
+fun pattern(vararg values: Int?): Pattern = values.map { when (it) {
     is Int -> Value.Fixed(it)
     else   -> Value.Any
 } }
@@ -37,7 +37,7 @@ fun Set<Pattern>.join(): Set<Pattern> {
         } }
     }
 
-    return pairs.map { (a, b) -> join(a, b) }.filterNotNull().toSet()
+    return pairs.mapNotNull { (a, b) -> join(a, b) }.toSet()
 }
 
 fun Pattern.split(): Set<Pair<Pattern, Pattern>> {
@@ -66,7 +66,7 @@ fun Pattern.split(): Set<Pair<Pattern, Pattern>> {
     }
 
     return splits
-        .filter { it.first.degree == it.second.degree && it.first.degree == currentDegree - 1 }
+        .filter { with(it.first.degree) { this == it.second.degree && this == currentDegree - 1 } }
         .toSet()
 }
 

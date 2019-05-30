@@ -19,6 +19,14 @@ fun main() {
 //        println("$it (${knowledge.supportFor(it)})")
 //    }
 
-    val rules = knowledge.discoverRules(support = 2/7.0).sortedBy(knowledge::supportFor)
+    val rules = knowledge.discoverRules(support = 2/7.0, confidence = 0.0).sortedBy(knowledge::supportFor)
+    println("Found ${rules.size} rules")
     rules.forEach { println("$it (s = ${knowledge.supportFor(it)})") }
+
+//    val rule = Rule(setOf(Equal(0, 2)), setOf(Equal(1, 1), Equal(2, 1)))
+
+//    rule `|` ::println
+//    rule.permutations().forEach(::println)
 }
+
+infix fun <T> T.`|`(action: (T) -> Unit): T = also(action)
