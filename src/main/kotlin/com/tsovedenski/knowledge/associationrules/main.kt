@@ -13,15 +13,12 @@ class Knowledge (vararg val knowledge: List<Int>) {
     val size = knowledge[0].size
     val rows = knowledge.size
 
-    fun discoverRules(support: Double): List<Rule> {
+    fun discoverRules(support: Double): Set<Rule> {
         tailrec fun go(patterns: Set<Pattern>, solutions: List<Set<Pattern>> = emptyList()): Set<Pattern> {
             val joined = patterns.join()
             val checked = joined
                 .filter { pattern -> pattern.subpatterns().all { it in patterns } }
             val next = checked.filter { supportFor(it) >= support }.toSet()
-
-            next.forEach(::println)
-            println()
 
             if (next.isEmpty()) {
                 return solutions.flatten().toSet()
@@ -49,7 +46,9 @@ class Knowledge (vararg val knowledge: List<Int>) {
         properties.forEach(::println)
         println()
 
-        return rules.filter { it.head.isNotEmpty() && it.tail.isNotEmpty() }
+        val clean = rules.filter { it.head.isNotEmpty() && it.tail.isNotEmpty() }
+
+        return (clean + clean.map(Rule::invert)).toSet()
     }
 
     fun getSimplePatterns(): Set<Pattern> {
@@ -166,7 +165,7 @@ fun main() {
         listOf(3,3,1),
         listOf(2,1,1)
     )
-    
+
 //    val patterns = knowledge.getSimplePatterns()
 //    patterns.forEach {
 //        println("$it (${knowledge.supportFor(it)})")
@@ -211,6 +210,8 @@ data class Rule (val head: Set<Equal>, val tail: Set<Equal>) {
     constructor(head: Equal, tail: Set<Equal>) : this(setOf(head), tail)
     constructor(head: Set<Equal>, tail: Equal) : this(head, setOf(tail))
     constructor(head: Equal, tail: Equal) : this(setOf(head), setOf(tail))
+
+    fun invert(): Rule = Rule(tail, head)
 
     override fun toString(): String {
         val p = head.joinToString(" ∧ ")
