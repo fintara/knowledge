@@ -64,7 +64,7 @@ Took 26 ms
 
 
 ## Association rules discovery
-Discover patterns and rules by providing desired minimum support and confidence.
+Discover patterns and rules by providing desired minimum support and confidence, using apriori algorithm.
 
 ### Example
 Let's initialize the knowledge, having 7 rows, each with 3 attributes:
@@ -127,3 +127,39 @@ x(1)=1 ⇒ x(0)=2
 x(1)=1 ⇒ x(2)=1
 x(2)=0 ⇒ x(0)=2
 ```
+
+
+
+
+
+## Association rules discovery (extended)
+Extend apriori algorithm (which works only with "=" relation (i.e. x(1)=2)) by including different relations in the pattern.
+Before: `[2,_,_]` would describe only rows where the x(1)=2.
+Now, `[=2,_,_]` describes the same, but we could instead use `[≤2,_,_]` to describe x(1)≤2.
+
+In total 6 relations have been added (`≠`, `=`, `<`, `≤`, `>`, `≥`).
+Using the knowledge defined in the previous section, now there are 54 patterns of degree 1:
+```
+[≠1, _, _]
+[≠2, _, _]
+[≠3, _, _]
+[=1, _, _]
+[=2, _, _]
+[=3, _, _]
+...
+[_, _, ≠0]
+[_, _, ≠1]
+[_, _, =0]
+[_, _, =1]
+[_, _, <0]
+[_, _, <1]
+[_, _, ≤0]
+[_, _, ≤1]
+[_, _, >0]
+[_, _, >1]
+[_, _, ≥0]
+[_, _, ≥1]
+```
+
+Discovering rules now yields 1441 of them.
+However, most of them are overlapping (e.g. x(2)≤1 and x(2)≥0 means that x(2) could have any value, but currently it is treated as 2 distinctive values).

@@ -15,9 +15,8 @@ fun main() {
     )
 
 //    val patterns = knowledge.getSimplePatterns()
-//    patterns.forEach {
-//        println("$it (${knowledge.supportFor(it)})")
-//    }
+//    println("Generated ${patterns.size} patterns")
+//    patterns.forEach(::println)
 
 //    val properties = knowledge.discoverProperties(support = 3/7.0).filter { knowledge.supportFor(it) <= 6/7.0 }.sortedBy(knowledge::supportFor)
 //    properties.forEach { println("$it (s = ${"%.2f".format(knowledge.supportFor(it))})") }
