@@ -114,16 +114,19 @@ patterns.forEach(::println)
 
 Finally, we could discover rules satisfying minimum support and confidence:
 ```kotlin
-val rules = knowledge.discoverRules(support = 2/7.0, confidence = 1.0).sortedBy(knowledge::supportFor)
-rules.forEach(::println)
+val rules = knowledge.discoverRules(support = 2/7.0, confidence = 1.0).sortedBy(knowledge::liftFor)
+println("Found ${rules.size} rules")
+rules.forEach { println("$it (s = ${"%.2f".format(knowledge.supportFor(it))}, c = ${"%.2f".format(knowledge.confidenceFor(it))}, l = ${"%.2f".format(knowledge.liftFor(it))})") }
 ```
 
 ```
-x(1)=1 ⇒ x(2)=1 ∧ x(0)=2
-x(1)=1 ∧ x(2)=1 ⇒ x(0)=2
-x(2)=1 ∧ x(0)=2 ⇒ x(1)=1
-x(0)=2 ∧ x(1)=1 ⇒ x(2)=1
-x(1)=1 ⇒ x(0)=2
-x(1)=1 ⇒ x(2)=1
-x(2)=0 ⇒ x(0)=2
+Found 7 rules
+x(1)=1 ∧ x(2)=1 ⇒ x(0)=2 (s = 0.29, c = 1.00, l = 1.40)
+x(1)=1 ⇒ x(0)=2 (s = 0.29, c = 1.00, l = 1.40)
+x(2)=0 ⇒ x(0)=2 (s = 0.43, c = 1.00, l = 1.40)
+x(0)=2 ∧ x(1)=1 ⇒ x(2)=1 (s = 0.29, c = 1.00, l = 1.75)
+x(1)=1 ⇒ x(2)=1 (s = 0.29, c = 1.00, l = 1.75)
+x(1)=1 ⇒ x(2)=1 ∧ x(0)=2 (s = 0.29, c = 1.00, l = 3.50)
+x(2)=1 ∧ x(0)=2 ⇒ x(1)=1 (s = 0.29, c = 1.00, l = 3.50)
+
 ```

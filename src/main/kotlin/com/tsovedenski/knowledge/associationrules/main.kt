@@ -19,9 +19,9 @@ fun main() {
 //        println("$it (${knowledge.supportFor(it)})")
 //    }
 
-    val rules = knowledge.discoverRules(support = 2/7.0, confidence = 0.0).sortedBy(knowledge::supportFor)
+    val rules = knowledge.discoverRules(support = 2/7.0, confidence = 1.0).sortedBy(knowledge::liftFor)
     println("Found ${rules.size} rules")
-    rules.forEach { println("$it (s = ${knowledge.supportFor(it)})") }
+    rules.forEach { println("$it (s = ${"%.2f".format(knowledge.supportFor(it))}, c = ${"%.2f".format(knowledge.confidenceFor(it))}, l = ${"%.2f".format(knowledge.liftFor(it))})") }
 
 //    val rule = Rule(setOf(Equal(0, 2)), setOf(Equal(1, 1), Equal(2, 1)))
 

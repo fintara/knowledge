@@ -65,6 +65,13 @@ class Knowledge (vararg val knowledge: List<Int>) {
         return num / den
     }
 
+    fun liftFor(rule: Rule): Double {
+        val num = supportFor(rule)
+        val den = supportFor(rule.head.toPattern(size)) * supportFor(rule.tail.toPattern(size))
+
+        return num / den
+    }
+
     private fun checkRowPattern(row: List<Int>, pattern: Pattern): Int {
         val sum = row.zip(pattern).map { (a, b) ->
             when (b) {
